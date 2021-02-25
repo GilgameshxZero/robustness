@@ -21,7 +21,7 @@ from torch.utils.data import DataLoader
 from . import imagenet_models as models
 
 def make_loaders(workers, batch_size, transforms, data_path, data_aug=True,
-                custom_class=None, dataset="", label_mapping=None, subset=None,
+                custom_class=None, dataset="", label_mapping=None, subset=None, test_subset=None,
                 subset_type='rand', subset_start=0, val_batch_size=None,
                 only_val=False, shuffle_train=True, shuffle_val=True, seed=1,
                 custom_class_args=None):
@@ -71,6 +71,7 @@ def make_loaders(workers, batch_size, transforms, data_path, data_aug=True,
         vals = {attr: hasattr(train_set, attr) for attr in attrs}
         assert any(vals.values()), f"dataset must expose one of {attrs}"
         train_sample_count = len(getattr(train_set,[k for k in vals if vals[k]][0]))
+    test_sample_count = len(getattr(test_set,[k for k in vals if vals[k]][0]))
 
     if (not only_val) and (subset is not None) and (subset <= train_sample_count):
         assert not only_val
@@ -84,6 +85,18 @@ def make_loaders(workers, batch_size, transforms, data_path, data_aug=True,
             subset = np.arange(train_sample_count - subset, train_sample_count)
 
         train_set = Subset(train_set, subset)
+
+    if (test_subset is not None) and (test_subset <= test_sample_count):
+        if subset_type == 'rand':
+            rng = np.random.RandomState(seed)
+            test_subset = rng.choice(list(range(test_sample_count)), size=test_subset+subset_start, replace=False)
+            test_subset = test_subset[subset_start:]
+        elif subset_type == 'first':
+            test_subset = np.arange(subset_start, subset_start + test_subset)
+        else:
+            test_subset = np.arange(test_sample_count - subtest_subsetset, test_sample_count)
+
+        test_set = Subset(test_set, test_subset)
 
     if not only_val:
         train_loader = DataLoader(train_set, batch_size=batch_size, 

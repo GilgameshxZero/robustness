@@ -119,7 +119,7 @@ class DataSet(object):
 
         raise NotImplementedError
 
-    def make_loaders(self, workers, batch_size, data_aug=True, subset=None, 
+    def make_loaders(self, workers, batch_size, data_aug=True, subset=None, test_subset=None,
                     subset_start=0, subset_type='rand', val_batch_size=None,
                     only_val=False, shuffle_train=True, shuffle_val=True, subset_seed=None):
         '''
@@ -167,6 +167,7 @@ class DataSet(object):
                                     custom_class=self.custom_class,
                                     val_batch_size=val_batch_size,
                                     subset=subset,
+                                    test_subset=test_subset,
                                     subset_start=subset_start,
                                     subset_type=subset_type,
                                     only_val=only_val,
